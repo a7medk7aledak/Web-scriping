@@ -29,8 +29,8 @@
 - **ملف الكود:** `news_scraper.py`  
 
 ## 🛠 تثبيت المكتبات المطلوبة
----
+```
 python -m venv .venv
 .venv/Scripts/activate
 pip install requests beautifulsoup4 fake-useragent pandas schedule
-```bash
+```
