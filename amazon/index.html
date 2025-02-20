@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لابتوبات أمازون</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f5f5f5;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 250px;
+            text-align: center;
+        }
+        .card img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .card h3 {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .card p {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .card a {
+            display: block;
+            text-decoration: none;
+            background: #007bff;
+            color: white;
+            padding: 8px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>لابتوبات متوفرة على أمازون</h1>
+    <div class="container" id="laptops"></div>
+
+    <script>
+        fetch('amazon_laptops.json') // تحميل البيانات من JSON
+            .then(response => response.json())
+            .then(data => {
+                let container = document.getElementById('laptops');
+                data.forEach(laptop => {
+                    let card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <img src="${laptop.image}" alt="صورة المنتج">
+                        <h3>${laptop.title}</h3>
+                        <p>${laptop.price} $</p>
+                        <a href="${laptop.link}" target="_blank">عرض المنتج</a>
+                    `;
+                    container.appendChild(card);
+                });
+            })
+            .catch(error => console.error('خطأ في تحميل البيانات:', error));
+    </script>
+</body>
+</html>

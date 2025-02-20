@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحليل الأخبار</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body { background-color: #f0f2f5; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header, .stat-card, .news-container {
+            background: #fff; padding: 15px; border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 15px;
+        }
+        .stats-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .stat-card { text-align: center; }
+        .value { font-size: 1.5rem; font-weight: bold; color: #1a237e; }
+        .news-filters { display: flex; gap: 10px; margin-bottom: 15px; }
+        .news-filters select, .news-filters input { padding: 8px; border: 1px solid #ddd; border-radius: 5px; }
+        .news-item { padding: 12px; border-bottom: 1px solid #eee; }
+        @media (max-width: 768px) { .stats-container { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header"><h1>لوحة تحليل الأخبار</h1></div>
+        <div class="stats-container">
+            <div class="stat-card"><h3>إجمالي الأخبار</h3><div class="value" id="totalNews">0</div></div>
+            <div class="stat-card"><h3>المصادر</h3><div class="value" id="totalSources">0</div></div>
+            <div class="stat-card"><h3>الأخبار اليوم</h3><div class="value" id="todayNews">0</div></div>
+        </div>
+        <div class="news-container">
+            <div class="news-filters">
+                <select id="sourceFilter"><option value="">كل المصادر</option></select>
+                <input type="text" id="searchFilter" placeholder="بحث...">
+                <select id="dateFilter">
+                    <option value="">كل التواريخ</option>
+                    <option value="today">اليوم</option>
+                    <option value="week">آخر أسبوع</option>
+                </select>
+            </div>
+            <div id="newsList"></div>
+        </div>
+    </div>
+    <script>
+        let newsData = [];
+        const dummyNewsData = [
+            { title: "إعلان جديد", source: "تكنولوجيا", timestamp: new Date().toISOString(), content: "تم الإعلان عن منصة جديدة." },
+            { title: "ارتفاع البورصة", source: "أخبار المال", timestamp: new Date(Date.now() - 86400000).toISOString(), content: "ارتفاع 2% في المؤشرات." }
+        ];
+        async function loadData() {
+            try {
+                const response = await fetch('news_data.json');
+                if (!response.ok) throw new Error();
+                newsData = await response.json();
+            } catch {
+                newsData = dummyNewsData;
+            }
+            updateDashboard();
+        }
+        function updateDashboard() {
+            document.getElementById('totalNews').textContent = newsData.length;
+            document.getElementById('totalSources').textContent = new Set(newsData.map(n => n.source)).size;
+            document.getElementById('todayNews').textContent = newsData.filter(n => new Date(n.timestamp).toDateString() === new Date().toDateString()).length;
+            updateSourceFilter();
+            filterAndDisplayNews();
+        }
+        function updateSourceFilter() {
+            const sourceFilter = document.getElementById('sourceFilter');
+            sourceFilter.innerHTML = '<option value="">كل المصادر</option>' + [...new Set(newsData.map(n => n.source))].map(s => `<option value="${s}">${s}</option>`).join('');
+        }
+        function filterAndDisplayNews() {
+            let filteredNews = newsData.filter(n => 
+                (!document.getElementById('sourceFilter').value || n.source === document.getElementById('sourceFilter').value) &&
+                (!document.getElementById('searchFilter').value || n.title.includes(document.getElementById('searchFilter').value) || n.content.includes(document.getElementById('searchFilter').value)) &&
+                (!document.getElementById('dateFilter').value || (document.getElementById('dateFilter').value === 'today' && new Date(n.timestamp).toDateString() === new Date().toDateString()) ||
+                (document.getElementById('dateFilter').value === 'week' && new Date(n.timestamp) >= new Date(Date.now() - 7 * 86400000)))
+            );
+            displayNews(filteredNews);
+        }
+        function displayNews(news) {
+            document.getElementById('newsList').innerHTML = news.length ? news.map(n => `<div class="news-item"><h3>${n.title}</h3><div>المصدر: ${n.source} | التاريخ: ${new Date(n.timestamp).toLocaleDateString('ar-EG')}</div><p>${n.content}</p></div>`).join('') : '<div style="text-align:center;padding:15px;">لا توجد أخبار</div>';
+        }
+        document.getElementById('sourceFilter').addEventListener('change', filterAndDisplayNews);
+        document.getElementById('searchFilter').addEventListener('input', filterAndDisplayNews);
+        document.getElementById('dateFilter').addEventListener('change', filterAndDisplayNews);
+        loadData();
+    </script>
+</body>
+</html>
