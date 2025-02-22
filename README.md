@@ -34,5 +34,9 @@ python -m venv .venv
 .venv/Scripts/activate
 pip install requests beautifulsoup4 fake-useragent pandas schedule
 ```
+install for j.s
+```
+npm i axios
+```
 api
 https://api.exchangerate-api.com/v4/latest/EGP
