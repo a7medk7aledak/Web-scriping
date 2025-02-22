@@ -1,11 +1,52 @@
 [
-    {
-        "timestamp": "2025-02-19 13:43:33",
-        "rates": {
-            "USD": 50.51,
-            "EUR": 52.91,
-            "GBP": 63.69,
-            "SAR": 13.5
-        }
-    }
+  {
+    "timestamp": "2025-02-21T13:43:32.889Z",
+    "rates": {
+      "USD": "50.5051",
+      "EUR": "52.9101",
+      "GBP": "63.6943",
+      "SAR": "13.4771"
+    },
+    "source": "Exchange Rate API"
+  },
+  {
+    "timestamp": "2025-02-21T13:39:19.340Z",
+    "rates": {
+      "USD": "50.5051",
+      "EUR": "52.9101",
+      "GBP": "63.6943",
+      "SAR": "13.4771"
+    },
+    "source": "Exchange Rate API"
+  },
+  {
+    "timestamp": "2025-02-21T13:33:22.751Z",
+    "rates": {
+      "USD": "50.5051",
+      "EUR": "52.9101",
+      "GBP": "63.6943",
+      "SAR": "13.4771"
+    },
+    "source": "Exchange Rate API"
+  },
+  {
+    "timestamp": "2025-02-21T13:27:54.115Z",
+    "rates": {
+      "USD": "50.5051",
+      "EUR": "52.9101",
+      "GBP": "63.6943",
+      "SAR": "13.4771"
+    },
+    "source": "Exchange Rate API"
+  },
+  {
+    "timestamp": "2025-02-21T13:23:52.494Z",
+    "rates": {
+      "USD": "50.5051",
+      "EUR": "52.9101",
+      "GBP": "63.6943",
+      "SAR": "13.4771"
+    },
+    "source": "Exchange Rate API"
+  }
 ]

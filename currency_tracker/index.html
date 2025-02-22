@@ -4,92 +4,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة أسعار العملات</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: "Tajawal", sans-serif;
         }
 
         body {
-            background: #f0f2f5;
+            background: #f0f4f8;
             padding: 20px;
+            color: #333;
         }
 
         .container {
             max-width: 1200px;
-            margin: 0 auto;
+            margin: auto;
         }
 
         .header {
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-
-        .header h1 {
-            color: #1a237e;
-            margin-bottom: 10px;
-        }
-
-        .last-update {
-            color: #666;
-            font-size: 14px;
+            background: linear-gradient(135deg, #0d47a1, #1976d2);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            color: #fff;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
         }
 
         .cards-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
         }
 
         .card {
             background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
             text-align: center;
+            transition: all 0.3s ease;
+            border-top: 4px solid #e0e0e0;
+        }
+
+        .card-usd { border-top-color: #4caf50; }
+        .card-eur { border-top-color: #2196f3; }
+        .card-gbp { border-top-color: #9c27b0; }
+        .card-sar { border-top-color: #ff9800; }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: inline-block;
+            color: #555;
         }
 
         .card h2 {
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            font-weight: 700;
+            font-size: 1.4rem;
         }
 
         .card .rate {
-            font-size: 24px;
-            font-weight: bold;
-            color: #1a237e;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0d47a1;
+            margin-bottom: 10px;
         }
 
-        .card .change {
-            margin-top: 10px;
-            font-size: 14px;
+        .refresh-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-bottom: 30px;
+            transition: background 0.2s;
         }
 
-        .positive {
-            color: #4caf50;
+        .refresh-btn:hover {
+            background: #0d47a1;
         }
 
-        .negative {
-            color: #f44336;
-        }
-
-        .chart-container {
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #757575;
+            font-size: 0.9rem;
         }
 
         @media (max-width: 768px) {
+            body { padding: 15px; }
+            .header { padding: 20px; }
             .cards-container {
                 grid-template-columns: 1fr;
+                gap: 15px;
             }
         }
     </style>
@@ -98,51 +123,28 @@
     <div class="container">
         <div class="header">
             <h1>أسعار العملات مقابل الجنيه المصري</h1>
-            <div class="last-update">آخر تحديث: <span id="lastUpdate">جاري التحميل...</span></div>
+            <div class="last-update" id="updateStatus">
+                <i class="fas fa-clock"></i>
+                آخر تحديث: <span id="lastUpdate"></span>
+            </div>
         </div>
 
         <div class="cards-container" id="currencyCards"></div>
 
-        <div class="chart-container">
-            <canvas id="ratesChart"></canvas>
+        <div style="text-align: center;">
+            <button class="refresh-btn" id="refreshBtn">
+                <i class="fas fa-sync-alt"></i>
+                تحديث البيانات
+            </button>
+        </div>
+
+        <div class="footer">
+            © 2025 لوحة أسعار العملات | تم التطوير بواسطة فريق التطوير
         </div>
     </div>
 
     <script>
-        let chart;
-
-        async function loadData() {
-            try {
-                const response = await fetch('currency_rates.json');
-                if (!response.ok) throw new Error('Failed to fetch data');
-                return await response.json();
-            } catch (error) {
-                console.error('خطأ في تحميل البيانات:', error);
-                return [];
-            }
-        }
-
-        function calculateChange(currentRate, previousRate) {
-            return previousRate ? (((currentRate - previousRate) / previousRate) * 100).toFixed(2) : "0.00";
-        }
-
-        function updateCards(latestData, previousData) {
-            const container = document.getElementById('currencyCards');
-            container.innerHTML = '';
-            Object.entries(latestData.rates).forEach(([currency, rate]) => {
-                const previousRate = previousData?.rates[currency] || rate;
-                const change = calculateChange(rate, previousRate);
-                const changeClass = change > 0 ? 'positive' : change < 0 ? 'negative' : '';
-
-                container.innerHTML += `
-                    <div class="card">
-                        <h2>${getCurrencyName(currency)}</h2>
-                        <div class="rate">${rate} جنيه</div>
-                        <div class="change ${changeClass}">${change > 0 ? '↑' : change < 0 ? '↓' : ''} ${Math.abs(change)}%</div>
-                    </div>
-                `;
-            });
-        }
+        let currentData = null;
 
         function getCurrencyName(code) {
             return {
@@ -153,53 +155,72 @@
             }[code] || code;
         }
 
-        function updateChart(data) {
-            const ctx = document.getElementById('ratesChart').getContext('2d');
-            if (chart) chart.destroy();
+        function getCurrencyIcon(code) {
+            return {
+                'USD': '<i class="fas fa-dollar-sign"></i>',
+                'EUR': '<i class="fas fa-euro-sign"></i>',
+                'GBP': '<i class="fas fa-pound-sign"></i>',
+                'SAR': '<i class="fas fa-coins"></i>'
+            }[code] || '<i class="fas fa-money-bill-alt"></i>';
+        }
 
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.map(entry => entry.timestamp),
-                    datasets: Object.entries(data[0].rates).map(([currency, _]) => ({
-                        label: getCurrencyName(currency),
-                        data: data.map(entry => entry.rates[currency]),
-                        borderColor: getColorForCurrency(currency),
-                        tension: 0.4
-                    }))
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'top' },
-                        title: { display: true, text: 'تغير أسعار العملات مع الوقت' }
-                    },
-                    scales: { y: { beginAtZero: false } }
-                }
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const options = { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            return date.toLocaleDateString('ar-EG', options);
+        }
+
+        function updateUI(data) {
+            // تحديث وقت آخر تحديث
+            document.getElementById('lastUpdate').textContent = formatDate(data.timestamp);
+
+            // تحديث البطاقات
+            const container = document.getElementById('currencyCards');
+            container.innerHTML = '';
+            
+            Object.entries(data.rates).forEach(([currency, rate]) => {
+                const cardClass = `card card-${currency.toLowerCase()}`;
+                const icon = getCurrencyIcon(currency);
+                
+                container.innerHTML += `
+                    <div class="${cardClass}">
+                        <div class="card-icon">${icon}</div>
+                        <h2>${getCurrencyName(currency)}</h2>
+                        <div class="rate">${parseFloat(rate).toFixed(2)} جنيه</div>
+                    </div>
+                `;
             });
         }
 
-        function getColorForCurrency(currency) {
-            return {
-                'USD': '#4caf50',
-                'EUR': '#2196f3',
-                'GBP': '#9c27b0',
-                'SAR': '#ff9800'
-            }[currency] || '#666';
-        }
-
-        async function initialize() {
-            const data = await loadData();
-            if (data.length) {
-                const latestData = data[data.length - 1];
-                document.getElementById('lastUpdate').textContent = latestData.timestamp;
-                updateCards(latestData, data.length > 1 ? data[data.length - 2] : null);
-                updateChart(data);
+        async function loadData() {
+            try {
+                const response = await fetch('currency_rates.json');
+                if (!response.ok) throw new Error('فشل تحميل البيانات');
+                
+                const data = await response.json();
+                currentData = Array.isArray(data) ? data[0] : data;
+                updateUI(currentData);
+            } catch (error) {
+                console.error('خطأ في تحميل البيانات:', error);
+                document.getElementById('updateStatus').innerHTML = `
+                    <i class="fas fa-exclamation-triangle" style="color: #ffcc00;"></i>
+                    فشل تحميل البيانات. حاول مرة أخرى.
+                `;
             }
         }
 
-        initialize();
-        setInterval(initialize, 300000);
+        // زر التحديث
+        document.getElementById('refreshBtn').addEventListener('click', loadData);
+
+        // التحميل الأولي وتحديث البيانات كل 5 دقائق
+        loadData();
+        setInterval(loadData, 300000);
     </script>
 </body>
 </html>

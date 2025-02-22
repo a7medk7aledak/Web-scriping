@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أخبار اليوم</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            text-align: right;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .article {
+            border-bottom: 1px solid #ddd;
+            padding: 15px;
+        }
+
+        .article:last-child {
+            border-bottom: none;
+        }
+
+        .article h2 {
+            font-size: 18px;
+            margin: 0;
+            color: #333;
+        }
+
+        .article a {
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .article p {
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>أحدث الأخبار</h1>
+    </header>
+
+    <main>
+        <div id="news-container">
+            <p>جارٍ تحميل الأخبار...</p>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const newsContainer = document.getElementById("news-container");
+
+            fetch("news_data.json")
+                .then(response => response.json())
+                .then(newsData => {
+                    newsContainer.innerHTML = ""; 
+
+                    if (newsData.length === 0) {
+                        newsContainer.innerHTML = "<p>لا توجد أخبار متاحة.</p>";
+                        return;
+                    }
+
+                    newsData.forEach(article => {
+                        const articleDiv = document.createElement("div");
+                        articleDiv.classList.add("article");
+
+                        articleDiv.innerHTML = `
+                            <h2><a href="${article.url}" target="_blank">${article.title}</a></h2>
+                            <p><strong>المصدر:</strong> ${article.source}</p>
+                            <p>${article.summary || "لا يوجد ملخص متاح."}</p>
+                            <p><strong>التاريخ:</strong> ${article.timestamp}</p>
+                        `;
+
+                        newsContainer.appendChild(articleDiv);
+                    });
+                })
+                .catch(error => {
+                    newsContainer.innerHTML = "<p>حدث خطأ أثناء تحميل الأخبار.</p>";
+                    console.error("Error fetching news data:", error);
+                });
+        });
+    </script>
+
+</body>
+</html>
